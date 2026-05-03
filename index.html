@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relógio & Cronômetro</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Relógio Mundial</h1>
+
+<div class="container">
+  <div class="clock-box">
+    <select id="tz1"></select>
+    <img id="flag1" class="flag">
+    <h2 id="clock1"></h2>
+  </div>
+
+  <div class="clock-box">
+    <select id="tz2"></select>
+    <img id="flag2" class="flag">
+    <h2 id="clock2"></h2>
+  </div>
+
+</div>
+<p id="difference"></p>
+<hr>
+<h1>Cronômetro</h1>
+
+<div class="stopwatch">
+  <h2 id="display">00:00:00</h2>
+  <div class="buttons">
+    <button onclick="start()">Iniciar</button>
+    <button onclick="pause()">Pausar</button>
+    <button onclick="reset()">Resetar</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
