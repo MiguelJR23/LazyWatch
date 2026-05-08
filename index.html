@@ -2,40 +2,125 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Relógio & Cronômetro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LazyWatch</title>
+
   <link rel="stylesheet" href="style.css">
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
+    rel="stylesheet"
+  >
 </head>
 <body>
 
-<h1>Relógio Mundial</h1>
+  <header>
+    <h1>
+      <i class="ri-time-line"></i>
+      LazyWatch
+    </h1>
 
-<div class="container">
-  <div class="clock-box">
-    <select id="tz1"></select>
-    <img id="flag1" class="flag">
-    <h2 id="clock1"></h2>
-  </div>
+    <p>
+      Relógios mundiais, cronômetro e timer.
+    </p>
+  </header>
 
-  <div class="clock-box">
-    <select id="tz2"></select>
-    <img id="flag2" class="flag">
-    <h2 id="clock2"></h2>
-  </div>
+  <main>
 
-</div>
-<p id="difference"></p>
-<hr>
-<h1>Cronômetro</h1>
+    <section class="section-title">
+      <h2>
+        <i class="ri-earth-line"></i>
+        Relógios Mundiais
+      </h2>
 
-<div class="stopwatch">
-  <h2 id="display">00:00:00</h2>
-  <div class="buttons">
-    <button onclick="start()">Iniciar</button>
-    <button onclick="pause()">Pausar</button>
-    <button onclick="reset()">Resetar</button>
-  </div>
-</div>
+      <button id="addClock">
+        <i class="ri-add-line"></i>
+        Adicionar Relógio
+      </button>
+    </section>
 
-<script src="script.js"></script>
+    <section id="clockContainer"></section>
+
+    <section class="difference-box">
+      <h3>
+        <i class="ri-time-line"></i>
+        Comparação
+      </h3>
+
+      <p id="comparisonText">
+        Adicione ao menos dois relógios.
+      </p>
+    </section>
+
+    <section class="tools">
+
+      <div class="tool-card">
+
+        <h2>
+          <i class="ri-timer-line"></i>
+          Cronômetro
+        </h2>
+
+        <div class="display" id="stopwatchDisplay">
+          00:00:00
+        </div>
+
+        <div class="buttons">
+          <button onclick="startStopwatch()">
+            Iniciar
+          </button>
+
+          <button onclick="pauseStopwatch()">
+            Pausar
+          </button>
+
+          <button onclick="resetStopwatch()">
+            Resetar
+          </button>
+        </div>
+
+      </div>
+
+      <div class="tool-card">
+
+        <h2>
+          <i class="ri-alarm-warning-line"></i>
+          Timer
+        </h2>
+
+        <div class="timer-inputs">
+
+          <input type="number" id="minutesInput" placeholder="Minutos">
+
+          <input type="number" id="secondsInput" placeholder="Segundos">
+
+        </div>
+
+        <div class="display" id="timerDisplay">
+          00:00
+        </div>
+
+        <div class="buttons">
+          <button onclick="startTimer()">
+            Iniciar
+          </button>
+
+          <button onclick="pauseTimer()">
+            Pausar
+          </button>
+
+          <button onclick="resetTimer()">
+            Resetar
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+
 </body>
 </html>

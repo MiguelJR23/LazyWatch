@@ -1,109 +1,416 @@
 const zones = [
-  { name: "Brasil (São Paulo)", tz: "America/Sao_Paulo", flag: "br.png" },
-  { name: "EUA (Nova York)", tz: "America/New_York", flag: "us.png" },
-  { name: "Reino Unido (Londres)", tz: "Europe/London", flag: "gb.png" },
-  { name: "França (Paris)", tz: "Europe/Paris", flag: "fr.png" },
-  { name: "Japão (Tóquio)", tz: "Asia/Tokyo", flag: "jp.png" },
-  { name: "Austrália (Sydney)", tz: "Australia/Sydney", flag: "au.png" }
+  {
+    city: "São Paulo",
+    country: "Brasil",
+    tz: "America/Sao_Paulo",
+    flag: "flags/br.png"
+  },
+
+  {
+    city: "Nova York",
+    country: "EUA",
+    tz: "America/New_York",
+    flag: "flags/us.png"
+  },
+
+  {
+    city: "Londres",
+    country: "Reino Unido",
+    tz: "Europe/London",
+    flag: "flags/gb.png"
+  },
+
+  {
+    city: "Paris",
+    country: "França",
+    tz: "Europe/Paris",
+    flag: "flags/fr.png"
+  },
+
+  {
+    city: "Tóquio",
+    country: "Japão",
+    tz: "Asia/Tokyo",
+    flag: "flags/jp.png"
+  },
+
+  {
+    city: "Sydney",
+    country: "Austrália",
+    tz: "Australia/Sydney",
+    flag: "flags/au.png"
+  }
 ];
 
-function populate(id) {
-  const select = document.getElementById(id);
+const container =
+  document.getElementById("clockContainer");
 
-  zones.forEach(z => {
-    const option = document.createElement("option");
-    option.value = z.tz;
-    option.textContent = z.name;
-    select.appendChild(option);
+const addClockBtn =
+  document.getElementById("addClock");
+
+let clocks = [];
+
+function createClock(savedZone = zones[0].tz) {
+
+  const id = Date.now();
+
+  clocks.push({
+    id,
+    tz: savedZone
   });
+
+  renderClocks();
+
+  saveClocks();
 }
 
-populate("tz1");
-populate("tz2");
+function renderClocks() {
 
-const saved1 = localStorage.getItem("tz1");
-const saved2 = localStorage.getItem("tz2");
+  container.innerHTML = "";
 
-if (saved1) document.getElementById("tz1").value = saved1;
-if (saved2) document.getElementById("tz2").value = saved2;
+  clocks.forEach(clock => {
 
-// função relógio
-function getTime(tz) {
-  return new Date().toLocaleTimeString("pt-BR", {
-    timeZone: tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit"
+    const zone =
+      zones.find(z => z.tz === clock.tz);
+
+    const card =
+      document.createElement("div");
+
+    card.className = "clock-card";
+
+    card.innerHTML = `
+      <div class="clock-top">
+
+        <img src="${zone.flag}">
+
+        <div>
+          <div class="clock-city">
+            ${zone.city}
+          </div>
+
+          <div class="clock-extra">
+            ${zone.country}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="clock-time"
+        id="time-${clock.id}">
+      </div>
+
+      <div class="clock-extra"
+        id="extra-${clock.id}">
+      </div>
+
+      <select onchange="changeZone(${clock.id}, this.value)">
+        ${zones.map(z => `
+          <option
+            value="${z.tz}"
+            ${z.tz === clock.tz ? "selected" : ""}
+          >
+            ${z.city}
+          </option>
+        `).join("")}
+      </select>
+    `;
+
+    container.appendChild(card);
   });
+
 }
 
-// atualiza a bandeira
-function updateFlag(selectId, imgId) {
-  const tz = document.getElementById(selectId).value;
-  const zone = zones.find(z => z.tz === tz);
-  document.getElementById(imgId).src = "flags/" + zone.flag;
+function changeZone(id, tz) {
+
+  const clock =
+    clocks.find(c => c.id === id);
+
+  clock.tz = tz;
+
+  renderClocks();
+
+  saveClocks();
 }
 
-// diferença horário
-function getOffset(tz) {
+function getTimeData(tz) {
+
   const now = new Date();
-  const local = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-  return (local - now) / (1000 * 60 * 60);
+
+  const formatter =
+    new Intl.DateTimeFormat("pt-BR", {
+      timeZone: tz,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
+  const hour =
+    Number(
+      new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour: "numeric",
+        hour12: false
+      }).format(now)
+    );
+
+  let period = "Noite";
+
+  if(hour >= 6 && hour < 12)
+    period = "Manhã";
+
+  else if(hour >= 12 && hour < 18)
+    period = "Tarde";
+
+  return {
+    time: formatter.format(now),
+    hour,
+    period
+  };
 }
 
-// loop
-setInterval(() => {
-  const tz1 = document.getElementById("tz1").value;
-  const tz2 = document.getElementById("tz2").value;
+function updateClocks() {
 
-  document.getElementById("clock1").textContent = getTime(tz1);
-  document.getElementById("clock2").textContent = getTime(tz2);
+  clocks.forEach(clock => {
 
-  updateFlag("tz1", "flag1");
-  updateFlag("tz2", "flag2");
+    const data =
+      getTimeData(clock.tz);
 
-  const diff = getOffset(tz2) - getOffset(tz1);
-  document.getElementById("difference").textContent =
-    "Diferença: " + diff + "h";
+    const timeEl =
+      document.getElementById(`time-${clock.id}`);
 
-}, 1000);
+    const extraEl =
+      document.getElementById(`extra-${clock.id}`);
 
-// salva
-document.getElementById("tz1").addEventListener("change", e => {
-  localStorage.setItem("tz1", e.target.value);
-});
+    if(timeEl) {
 
-document.getElementById("tz2").addEventListener("change", e => {
-  localStorage.setItem("tz2", e.target.value);
-});
+      timeEl.textContent =
+        data.time;
 
-// Cronomêtro
-let time = 0;
-let interval = null;
+      extraEl.textContent =
+        data.period;
+    }
+  });
 
-function format(ms) {
-  let total = Math.floor(ms / 1000);
-  let h = String(Math.floor(total / 3600)).padStart(2, '0');
-  let m = String(Math.floor((total % 3600) / 60)).padStart(2, '0');
-  let s = String(total % 60).padStart(2, '0');
+  updateComparison();
+}
+
+function updateComparison() {
+
+  const text =
+    document.getElementById("comparisonText");
+
+  if(clocks.length < 2) {
+
+    text.textContent =
+      "Adicione ao menos dois relógios.";
+
+    return;
+  }
+
+  const first =
+    getTimeData(clocks[0].tz);
+
+  const second =
+    getTimeData(clocks[1].tz);
+
+  let diff =
+    second.hour - first.hour;
+
+  if(diff > 0)
+    diff = `+${diff}`;
+
+  text.textContent =
+    `Diferença entre os dois primeiros relógios: ${diff}h`;
+}
+
+function saveClocks() {
+
+  localStorage.setItem(
+    "lazywatch-clocks",
+    JSON.stringify(clocks)
+  );
+}
+
+function loadClocks() {
+
+  const saved =
+    localStorage.getItem(
+      "lazywatch-clocks"
+    );
+
+  if(saved) {
+
+    clocks = JSON.parse(saved);
+
+    renderClocks();
+
+  } else {
+
+    createClock(zones[0].tz);
+
+    createClock(zones[4].tz);
+  }
+}
+
+addClockBtn.addEventListener(
+  "click",
+  () => createClock(zones[0].tz)
+);
+
+loadClocks();
+
+setInterval(updateClocks, 1000);
+
+updateClocks();
+
+
+// =========================
+// CRONÔMETRO
+// =========================
+
+let stopwatchTime = 0;
+let stopwatchInterval = null;
+
+function formatTime(ms) {
+
+  const total =
+    Math.floor(ms / 1000);
+
+  const h =
+    String(
+      Math.floor(total / 3600)
+    ).padStart(2, "0");
+
+  const m =
+    String(
+      Math.floor((total % 3600) / 60)
+    ).padStart(2, "0");
+
+  const s =
+    String(total % 60)
+    .padStart(2, "0");
+
   return `${h}:${m}:${s}`;
 }
 
-function start() {
-  if (interval) return;
-  interval = setInterval(() => {
-    time += 1000;
-    document.getElementById("display").textContent = format(time);
-  }, 1000);
+function startStopwatch() {
+
+  if(stopwatchInterval)
+    return;
+
+  stopwatchInterval =
+    setInterval(() => {
+
+      stopwatchTime += 1000;
+
+      document.getElementById(
+        "stopwatchDisplay"
+      ).textContent =
+        formatTime(stopwatchTime);
+
+    }, 1000);
 }
 
-function pause() {
-  clearInterval(interval);
-  interval = null;
+function pauseStopwatch() {
+
+  clearInterval(stopwatchInterval);
+
+  stopwatchInterval = null;
 }
 
-function reset() {
-  pause();
-  time = 0;
-  document.getElementById("display").textContent = "00:00:00";
+function resetStopwatch() {
+
+  pauseStopwatch();
+
+  stopwatchTime = 0;
+
+  document.getElementById(
+    "stopwatchDisplay"
+  ).textContent = "00:00:00";
+}
+
+
+// =========================
+// TIMER
+// =========================
+
+let timer = 0;
+let timerInterval = null;
+
+function updateTimerDisplay() {
+
+  const m =
+    String(Math.floor(timer / 60))
+    .padStart(2, "0");
+
+  const s =
+    String(timer % 60)
+    .padStart(2, "0");
+
+  document.getElementById(
+    "timerDisplay"
+  ).textContent =
+    `${m}:${s}`;
+}
+
+function startTimer() {
+
+  if(timerInterval)
+    return;
+
+  if(timer <= 0) {
+
+    const min =
+      Number(
+        document.getElementById(
+          "minutesInput"
+        ).value
+      ) || 0;
+
+    const sec =
+      Number(
+        document.getElementById(
+          "secondsInput"
+        ).value
+      ) || 0;
+
+    timer = (min * 60) + sec;
+  }
+
+  updateTimerDisplay();
+
+  timerInterval =
+    setInterval(() => {
+
+      timer--;
+
+      updateTimerDisplay();
+
+      if(timer <= 0) {
+
+        clearInterval(timerInterval);
+
+        timerInterval = null;
+
+        alert("Tempo encerrado!");
+      }
+
+    }, 1000);
+}
+
+function pauseTimer() {
+
+  clearInterval(timerInterval);
+
+  timerInterval = null;
+}
+
+function resetTimer() {
+
+  pauseTimer();
+
+  timer = 0;
+
+  updateTimerDisplay();
 }
